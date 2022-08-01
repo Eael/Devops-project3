@@ -52,7 +52,7 @@ jobs:
 
   build-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: circleci/node:15.0.1
     steps:
       - checkout
       - restore_cache:
@@ -68,7 +68,6 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
             
-
 workflows:
   default:
     jobs:
