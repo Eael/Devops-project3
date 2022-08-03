@@ -389,4 +389,4 @@ workflows:
             - deploy-frontend
       - smoke-test:
           requires:
-            - deploy-backend  
+            - deploy-backend 
