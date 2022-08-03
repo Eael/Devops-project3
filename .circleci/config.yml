@@ -206,14 +206,23 @@ jobs:
       - image: circleci/node:13.8.0 # safest to use to avoid migration errors
     steps:
       - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt install -y tar gzip curl
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip -qq awscliv2.zip
+            sudo ./aws/install
       - restore_cache:
           keys: [backend-build]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Run migrations
           command: |
             cd backend
             npm install
-            npm run migrations > migrations_dump.txt
+            npm run migrations >> migrations_dump.txt
       - run:
           name: Send migration results to kvdb
           command: |
@@ -223,12 +232,12 @@ jobs:
             fi     
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          
   deploy-frontend:
     docker:
       - image: python:3.7-alpine3.16
     steps:
-      - attach_workspace:
-          at: ~/
+      - checkout
       - run: 
           name: Install Dependencies
           command: |
