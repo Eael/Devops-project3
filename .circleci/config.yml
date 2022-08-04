@@ -330,7 +330,7 @@ jobs:
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL
-            if curl --connect-timeout 5 "${API_URL}/api/status" | grep "ok"
+            if curl --connect-timeout 2.37 "${API_URL}/api/status" | grep "ok"
             then 
               return 0
             else 
@@ -389,4 +389,4 @@ workflows:
             - deploy-frontend
       - smoke-test:
           requires:
-            - deploy-backend 
+            - deploy-backend  
