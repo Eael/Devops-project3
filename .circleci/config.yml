@@ -320,7 +320,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update --no-cache curl nodejs npm aws-cli
+            apk add --update --no-cache curl nodejs npm aws-cli pm2
       - run:
           name: Backend smoke test
           command: |
@@ -387,6 +387,6 @@ workflows:
       - deploy-backend:
           requires:
             - deploy-frontend
-      - smoke-test:
-          requires:
-            - deploy-backend  
+      #- smoke-test:
+      #    requires:
+      #      - deploy-backend  
