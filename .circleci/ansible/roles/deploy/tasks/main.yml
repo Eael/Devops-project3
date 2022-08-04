@@ -32,7 +32,7 @@
     src: files/artifact.tar.gz
     dest: .
 
-- name: start app
+- name: Start backend code
   become: yes
   shell: |
     pm2 delete all
