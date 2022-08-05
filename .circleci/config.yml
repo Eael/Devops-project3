@@ -201,8 +201,8 @@ jobs:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> backend/.env
             echo TYPEORM_PORT=$TYPEORM_PORT >> backend/.env
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> backend/.env
-            echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> backend/.env 
-            cat backend/.env        
+            echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> backend/.env
+            cat backend/.env
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
       - persist_to_workspace:
@@ -330,7 +330,7 @@ jobs:
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL
-            if curl --connect-timeout 5 --retry-connrefused 5 "${API_URL}/api/status" | grep "ok"
+            if curl --connect-timeout 1.5 --retry-connrefused 5 "${API_URL}/api/status" | grep "ok"
             then 
               return 0
             else 
@@ -347,7 +347,10 @@ jobs:
             else 
               return 1 
             fi
-
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 workflows:
   dev:
     jobs:
