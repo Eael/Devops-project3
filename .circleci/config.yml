@@ -216,9 +216,7 @@ jobs:
     docker:
       - image: circleci/node:16.10.0 
     steps:
-      - checkout
-      - attach_workspace:
-          at: ~/      
+      - checkout    
       - run:
           name: Install dependencies
           command: |
@@ -228,6 +226,8 @@ jobs:
             sudo ./aws/install
       - restore_cache:
           keys: [backend-build]
+      - attach_workspace:
+          at: ~/  
       - run:
           name: Run migrations
           command: |
@@ -239,8 +239,6 @@ jobs:
             if grep -q "successfull" ~/project/backend/migrations_dump.txt
             then
               curl --insecure https://kvdb.io/9owLR2ogT3YLEKDfEmC4oj/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
-            else 
-              return 1
             fi     
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -287,14 +285,14 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints: ['33:ff:12:2f:83:4e:70:af:ff:85:0f:74:f6:67:7c:41']
-      - attach_workspace:
-          at: ~/
       - run:
           name: Install dependencies
           command: |
             apk add --update --no-cache tar gzip nodejs npm aws-cli ansible
       - restore_cache:
           keys: [backend-build]
+      - attach_workspace:
+          at: ~/  
       - run:
           name: Deploy backend
           command: |
@@ -331,7 +329,7 @@ jobs:
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL
-            if curl --connect-timeout 1.5 --retry-connrefused 5 "${API_URL}/api/status" | grep "ok"
+            if curl --connect-timeout 5 --retry-connrefused 5 "${API_URL}/api/status" | grep "ok"
             then 
               return 0
             else 
