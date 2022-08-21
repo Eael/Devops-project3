@@ -239,6 +239,8 @@ jobs:
             if grep -q "successfull" ~/project/backend/migrations_dump.txt
             then
               curl --insecure https://kvdb.io/9owLR2ogT3YLEKDfEmC4oj/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
+            else 
+              return 1
             fi     
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -333,7 +335,7 @@ jobs:
             then 
               return 0
             else 
-              return 0 
+              return 1 
             fi 
       - run:
           name: Frontend smoke test.
@@ -402,4 +404,44 @@ jobs:
 workflows:
   dev:
     jobs:
-      - cleanup
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires:
+            - build-frontend
+      - test-backend:
+          requires:
+            - build-backend
+      - scan-frontend:
+          requires:
+            - test-frontend
+      - scan-backend:
+          requires:
+            - test-backend
+      - deploy-infrastructure:
+          requires:
+            - test-frontend
+            - test-backend
+            - scan-frontend
+            - scan-backend
+      - configure-infrastructure:
+          requires:
+            - deploy-infrastructure
+      - run-migrations:
+          requires:
+            - configure-infrastructure
+      - deploy-frontend:
+          requires:
+            - run-migrations
+      - deploy-backend:
+          requires:
+            - deploy-frontend
+      - smoke-test:
+          requires:
+            - deploy-backend
+      - cloudfront-update:
+          requires:
+            - smoke-test
+      - cleanup:
+          requires:
+            - cloudfront-update
