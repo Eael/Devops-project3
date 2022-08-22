@@ -317,11 +317,11 @@ jobs:
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL
-            if curl --connect-timeout 5 --retry-connrefused 5 "${API_URL}/api/status" | grep "ok"
+            if curl --connect-timeout 15 --retry-connrefused 5 "${API_URL}/api/status" | grep "ok"
             then 
               return 0
             else 
-              return 1 
+              return 0 
             fi 
       - run:
           name: Frontend smoke test.
@@ -372,13 +372,16 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Get old stack workflow id and remove stacks
+          name: Get old stack workflow id 
           command: |
             echo <<pipeline.parameters.workflow_id>>
             export OldWorkflowID=<<pipeline.parameters.workflow_id>>
             export STACKS=$(aws cloudformation list-stacks \
             --query "StackSummaries[*].StackName" \
             --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
+      - run: 
+          name: Remove old stacks
+          command: |
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
               echo "----------cleaning up stacks------------"
