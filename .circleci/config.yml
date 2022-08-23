@@ -202,7 +202,7 @@ jobs:
 
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0 
+      - image: circleci/node:16.9.0 
     steps:
       - checkout    
       - run:
@@ -220,7 +220,6 @@ jobs:
           name: Run migrations
           command: |
             cd ~/project/backend
-            npm audit fix --audit-level=critical --force
             npm run migrations >> migrations_dump.txt
       - run:
           name: Send migration results to kvdb
