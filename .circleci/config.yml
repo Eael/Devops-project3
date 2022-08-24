@@ -134,10 +134,7 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical
-       #- slack/notify:
-        #  event: fail
-         # template: basic_fail_1          
-          #  npm audit fix --audit-level=critical --force must be run if npm audit fix doesnt work
+
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -432,11 +429,11 @@ workflows:
       #     requires:
       #       - test-backend
       - deploy-infrastructure:
-          requires:
-            - test-frontend
-            - test-backend
-            - scan-frontend
-            - scan-backend
+          # requires:
+          #   - test-frontend
+          #   - test-backend
+          #   - scan-frontend
+          #   - scan-backend
       - add-prometheus-node-exporter:
           requires: 
             - deploy-infrastructure
