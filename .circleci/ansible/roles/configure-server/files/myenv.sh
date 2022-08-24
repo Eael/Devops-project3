@@ -1,9 +1,0 @@
-  export TYPEFORM_CONNECTION=postgres
-  export TYPEFORM_ENTITIES=./src/modules/domain/**/*.entity.ts
-  export TYPEFORM_HOST=database-1.cwhunrnzkqjs.us-east-1.rds.amazonaws.com
-  export TYPEFORM_PORT=5432
-  export TYPEFORM_USERNAME=postgres
-  export TYPEFORM_PASSWORD=udacitypostgre
-  export TYPEFORM_DATABASE=postgres
-  export TYPEFORM_MIGRATIONS=./src/migrations/*.ts
-  export TYPEFORM_MIGRATIONS_DIR=./src/migrations
