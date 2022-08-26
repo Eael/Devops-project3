@@ -22,22 +22,15 @@
     global: yes
     state: latest
     production: yes
-- name: "Create backend directory"
-  file:
-    path: ~/project/backend_app_dir
-    state: directory
-
-- name: "Copy artifact into instance"
+- name: extract artifact
   become: yes
-  copy:
-    src: ~/project/artifact.tar.gz
-    dest: /home/ubuntu/backend_app_dir/artifact.tar.gz
+  unarchive:
+    src: .circleci/ansible/roles/deploy/files/artifact.tar.gz
+    dest: .
 
 - name: start app
   become: yes
   shell: |
-    cd /home/ubuntu/backend_app_dir
-    tar xzvf artifact.tar.gz
     npm install
     npm run build
     pm2 delete all
