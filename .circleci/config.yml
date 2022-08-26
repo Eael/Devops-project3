@@ -457,10 +457,10 @@ workflows:
             - test-backend
             - scan-frontend
             - scan-backend
-          filters:
-            branches:
-              only:
-                - master
+          # filters:
+          #   branches:
+          #     only:
+          #       - master
       - add-prometheus-node-exporter:
           requires: 
             - deploy-infrastructure
