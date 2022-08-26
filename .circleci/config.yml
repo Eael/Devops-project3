@@ -214,7 +214,7 @@ jobs:
 
   run-migrations:
     docker:
-      - image: circleci/node:16.10.0 # node:16.10.0 works for me
+      - image: circleci/node:13.8.0 # node:16.10.0 works for me
     steps:
       - checkout
       - run:
