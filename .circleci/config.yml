@@ -117,7 +117,7 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical  
-          #  npm audit fix --audit-level=critical --force must be run if npm audit fix doesnt work            
+#  npm audit fix --audit-level=critical --force must be run if npm audit fix doesnt work            
 
   scan-backend:
     docker:
@@ -214,7 +214,7 @@ jobs:
 
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0 # node:16.10.0 works for me
+      - image: circleci/node:16.10.0 # node:16.10.0 works for me
     steps:
       - checkout
       - run:
@@ -333,7 +333,12 @@ jobs:
               --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL
-            if curl --connect-timeout 5 "${API_URL}/api/status" | grep "ok"; then return 0; else return 0; fi 
+            if curl --connect-timeout 5 "${API_URL}/api/status" | grep "ok"
+            then
+              return 0
+            else
+              return 1
+            fi
       - run:
           name: Frontend smoke test.
           command: |
@@ -377,6 +382,7 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+  
   cleanup:
     docker:
       - image: amazon/aws-cli
