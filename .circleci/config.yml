@@ -57,7 +57,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-
+  
   build-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -74,7 +74,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-
+  
   test-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -87,7 +87,8 @@ jobs:
           command: |
             cd frontend
             npm install
-            npm run test  
+            npm run test
+  
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -100,7 +101,7 @@ jobs:
           command: |
             cd backend
             npm install
-            npm run test   
+            npm run test
   
   scan-frontend:
     docker:
@@ -110,15 +111,14 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
-          name: Analyse Frontend
+          name: Analyse frontend
           command: |
             cd frontend
             npm install
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical  
-#  npm audit fix --audit-level=critical --force must be run if npm audit fix doesnt work            
-
+            npm audit --audit-level=critical
+  
   scan-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -129,13 +129,47 @@ jobs:
       - run:
           name: Analyse backend
           command: |
-            cd backend
+            cd frontend
             npm install
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
-            npm audit fix --audit-level=critical
+            npm audit --audit-level=critical
 
   deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: yum install -y tar gzip
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --tags project=your-tag \
+              --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --tags project=your-tag \
+              --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            echo $(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
+            --output text) >> ~/project/.circleci/ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
     docker:
       - image: amazon/aws-cli
     steps:
@@ -294,18 +328,14 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - attach_workspace:
-          at: ~/  
+          at: ~/
       - run:
           name: Deploy backend
           command: |
-            pwd 
-            ls -al
             cd backend
             npm install
             npm run build
             cd ..
-            pwd 
-            ls -al
             tar -C backend -czvf artifact.tar.gz .
             mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
             mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
@@ -341,7 +371,7 @@ jobs:
             then
               return 0
             else
-              return 0
+              return 1
             fi
       - run:
           name: Frontend smoke test.
