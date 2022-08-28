@@ -170,43 +170,6 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run: 
-          name: Install tar gzip
-          command: yum install -y tar gzip
-      - run: 
-          name: Ensure backend exists
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --tags project=udapeople \
-              --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} 
-
-      - run:
-          name: Ensure front-end infrastructure exist
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
-              --tags project=udapeoplefrontend \
-              --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}            
-      - run:
-          name: Add the EC2 instance IP to the Ansible inventory
-          command: |
-            echo $(aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-            --output text) >> ~/project/.circleci/ansible/inventory.txt
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   configure-infrastructure:
     docker:
@@ -371,7 +334,7 @@ jobs:
             then
               return 0
             else
-              return 0
+              return 1
             fi
       - run:
           name: Frontend smoke test.
