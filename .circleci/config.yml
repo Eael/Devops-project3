@@ -66,7 +66,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: Back-end build
+          name: Backend build
           command: |
             cd backend
             npm install
@@ -158,7 +158,7 @@ jobs:
               --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
               --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
       - run:
-          name: Add back-end ip to ansible inventory
+          name: Add backend ip to ansible inventory
           command: |
             echo $(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
@@ -454,10 +454,10 @@ workflows:
             - test-backend
             - scan-frontend
             - scan-backend
-          # filters:
-          #   branches:
-          #     only:
-          #       - master
+          filters:
+            branches:
+              only:
+                - master
       - add-prometheus-node-exporter:
           requires: 
             - deploy-infrastructure
@@ -480,6 +480,6 @@ workflows:
       - cloudfront-update:
           requires:
             - smoke-test
-      # - cleanup:
-      #     requires:
-      #       - cloudfront-update
+      - cleanup:
+          requires:
+            - cloudfront-update
