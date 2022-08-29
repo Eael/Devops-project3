@@ -1,0 +1,2 @@
+GITHUB: https://github.com/Eael/Devops-project3.git
+S3: http://udapeople-bf9b1ed.s3-website-us-east-1.amazonaws.com
