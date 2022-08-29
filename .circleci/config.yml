@@ -388,7 +388,7 @@ jobs:
       - run:
           name: Get old stack workflow 
           command: |
-            echo <<pipeline.parameters.workflow_id>>
+            echo "Deleting resources with ID <<pipeline.parameters.workflow_id>>"
             export OldWorkflowID=<<pipeline.parameters.workflow_id>>
             export STACKS=$(aws cloudformation list-stacks \
             --query "StackSummaries[*].StackName" \
