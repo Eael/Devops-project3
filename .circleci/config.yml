@@ -382,9 +382,15 @@ jobs:
   
   cleanup:
     docker:
-      - image: amazon/aws-cli
+      - image: cimg/base:stable
     steps:
       - checkout
+      - run:
+          name: Install AWS cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - run:
           name: Get old stack workflow 
           command: |
@@ -396,6 +402,7 @@ jobs:
               --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
             echo Stack names: "${STACKS[@]}"
+            echo s3://udapeople-${OldWorkflowID}
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
               echo "----------cleaning up stacks------------"
