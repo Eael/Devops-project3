@@ -352,7 +352,7 @@ jobs:
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-  cloudfront-update:
+  cloudfront-update: 
     docker:
       - image: circleci/node:13.8.0
     steps:
@@ -388,17 +388,12 @@ jobs:
       - run:
           name: Get old stack workflow 
           command: |
-            export STACKS=($(aws cloudformation list-stacks \
-                --query "StackSummaries[*].StackName" \
-                --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+            echo <<pipeline.parameters.workflow_id>>
+            export OldWorkflowID=<<pipeline.parameters.workflow_id>>
+            export STACKS=$(aws cloudformation list-stacks \
+            --query "StackSummaries[*].StackName" \
+            --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
             echo Stack names: "${STACKS[@]}"
-            export OldWorkflowID=$(curl --insecure  https://kvdb.io/KpKbtY9jv5JTictPoAZasw/old_workflow_id)
-            echo Old Workflow ID: $OldWorkflowID
-      - run:
-          name: Delete stack
-          command: |
-            export OldWorkflowID=$(curl --insecure  https://kvdb.io/KpKbtY9jv5JTictPoAZasw/old_workflow_id)
-            echo Old Workflow ID: $OldWorkflowID         
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
               echo "----------cleaning up stacks------------"
@@ -480,6 +475,6 @@ workflows:
       - cloudfront-update:
           requires:
             - smoke-test
-      - cleanup:
-          requires:
-            - cloudfront-update
+      # - cleanup
+      #     requires:
+      #       - cloudfront-update
