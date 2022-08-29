@@ -57,7 +57,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-
+  
   build-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -66,7 +66,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: Back-end build
+          name: Backend build
           command: |
             cd backend
             npm install
@@ -74,7 +74,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-
+  
   test-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -87,7 +87,8 @@ jobs:
           command: |
             cd frontend
             npm install
-            npm run test  
+            npm run test
+  
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -100,7 +101,7 @@ jobs:
           command: |
             cd backend
             npm install
-            npm run test   
+            npm run test
   
   scan-frontend:
     docker:
@@ -110,15 +111,14 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
-          name: Analyse Frontend
+          name: Analyse frontend
           command: |
             cd frontend
             npm install
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical  
-          #  npm audit fix --audit-level=critical --force must be run if npm audit fix doesnt work            
-
+            npm audit --audit-level=critical
+  
   scan-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -129,39 +129,36 @@ jobs:
       - run:
           name: Analyse backend
           command: |
-            cd backend
+            cd frontend
             npm install
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
-            npm audit fix --audit-level=critical
+            npm audit --audit-level=critical
 
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run: 
-          name: Install tar gzip
-          command: yum install -y tar gzip
-      - run: 
-          name: Ensure backend exists
+      - run: yum install -y tar gzip
+      - run:
+          name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              --tags project=udapeople \
+              --tags project=your-tag \
               --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} 
-
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              --tags project=udapeoplefrontend \
+              --tags project=your-tag \
               --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}            
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
       - run:
-          name: Add the EC2 instance IP to the Ansible inventory
+          name: Add backend ip to ansible inventory
           command: |
             echo $(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
@@ -233,7 +230,7 @@ jobs:
           command: |
             cd backend
             sudo npm install -g npm
-            npm run migrations > migrations_dump.txt
+            npm run migrations >> migrations_dump.txt
             cat migrations_dump.txt
       - run:
           name: Send migration results to kvdb
@@ -294,7 +291,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - attach_workspace:
-          at: ~/  
+          at: ~/
       - run:
           name: Deploy backend
           command: |
@@ -333,7 +330,12 @@ jobs:
               --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL
-            if curl --connect-timeout 5 "${API_URL}/api/status" | grep "ok"; then return 0; else return 0; fi 
+            if curl --connect-timeout 5 "${API_URL}/api/status" | grep "ok"
+            then
+              return 0
+            else
+              return 0
+            fi
       - run:
           name: Frontend smoke test.
           command: |
@@ -377,6 +379,7 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+  
   cleanup:
     docker:
       - image: amazon/aws-cli
@@ -473,6 +476,7 @@ workflows:
       - smoke-test:
           requires:
             - deploy-backend
+            - deploy-frontend
       - cloudfront-update:
           requires:
             - smoke-test

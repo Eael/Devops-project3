@@ -31,5 +31,7 @@
 - name: start app
   become: yes
   shell: |
+    npm install
+    npm run build
     pm2 delete all
     pm2 start npm -- start
